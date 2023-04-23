@@ -82,3 +82,26 @@ GET: Get all issued books with their fine
 ## npm i nodemon --save-dev
 
 ## npm run dev
+
+
+
+MVC Arch => Contrllers
+   >> M: Model (It depicts the structure of a MongoDb Collections)
+   >> V: View (wrt to frontend (reactJs))
+   >> C: Controllers (Brain or logical part of a route)
+            >> books.controllers.js
+            >> users.controllers.js
+
+
+
+Schema >>
+   id: String
+   name: String
+   age: Number
+   gender: char || varchar(15)
+
+Model >>
+   id: 123
+   name: Adarsh
+   age: 23
+   gender: Male   

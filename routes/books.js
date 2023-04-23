@@ -1,9 +1,21 @@
 const express = require("express");
 
+const {
+   getAllBooks,
+   getSingleBookById,
+   getAllIssuedBooks,
+ } = require("../controllers/book-controller");
 const { books } = require("../data/books.json");
 const { users } = require("../data/users.json");
 
+// const { route } = require("./users");
+
+// const BookModel = require('../models/book-model');
+// const UserModel = require('../models/user-model');
+
 const router = express.Router();
+
+const { UserModel, BookModel } = require("../models/index");
 
 /**
  * Route: /books/:Id
@@ -12,22 +24,22 @@ const router = express.Router();
  * Access: Public
  * Parameters: Id
  */
-router.get("/:id", (req, res) => {
-  const { id } = req.params;
-  const book = books.find((each) => each.id === id);
+router.get("/:id", getSingleBookById);
+//   const { id } = req.params;
+//   const book = books.find((each) => each.id === id);
 
-  if (!books) {
-    return res.status(404).json({
-      success: false,
-      message: "Book Not Found",
-    });
-  }
-  return res.status(200).json({
-    success: true,
-    message: "Found the Book By their Id",
-    data: book,
-  });
-});
+//   if (!books) {
+//     return res.status(404).json({
+//       success: false,
+//       message: "Book Not Found",
+//     });
+//   }
+//   return res.status(200).json({
+//     success: true,
+//     message: "Found the Book By their Id",
+//     data: book,
+//   });
+// });
 
 /**
  * Route: /books
@@ -36,11 +48,7 @@ router.get("/:id", (req, res) => {
  * Access: Public
  * Parameters: None
  */
-router.get("/", (req, res) => {
-  res
-    .status(200)
-    .json({ success: true, message: "Got all the Books", data: books });
-});
+router.get("/", getAllBooks);
 
 /**
  * Route: /books/:Id
@@ -50,33 +58,33 @@ router.get("/", (req, res) => {
  * Parameters: Id
  */
 
-router.get("/issued/by-user", (req, res) => {
-  const usersWithTheIssuedBook = users.filter((each) => {
-    if (each.issuedBook) return each;
-  });
-  const issuedBooks = [];
+router.get("/issued/by-user", getAllIssuedBooks );
+//   const usersWithTheIssuedBook = users.filter((each) => {
+//     if (each.issuedBook) return each;
+//   });
+//   const issuedBooks = [];
 
-  usersWithTheIssuedBook.forEach((each) => {
-    const book = books.find((book) => (book.id = each.issuedBook));
+//   usersWithTheIssuedBook.forEach((each) => {
+//     const book = books.find((book) => (book.id = each.issuedBook));
 
-    book.issuedBy = each.name;
-    book.issuedDate = each.issuedDate;
-    book.returnDate = each.returnDate;
+//     book.issuedBy = each.name;
+//     book.issuedDate = each.issuedDate;
+//     book.returnDate = each.returnDate;
 
-    issuedBooks.push(book);
-  });
-  if (issuedBooks.length === 0) {
-    return res.status(404).json({
-      success: false,
-      message: "No Book Have Been Issued Yet..",
-    });
-  }
-  return res.status(200).json({
-    success: true,
-    messsage: "Users with the Issued Books..",
-    data: issuedBooks,
-  });
-});
+//     issuedBooks.push(book);
+//   });
+//   if (issuedBooks.length === 0) {
+//     return res.status(404).json({
+//       success: false,
+//       message: "No Book Have Been Issued Yet..",
+//     });
+//   }
+//   return res.status(200).json({
+//     success: true,
+//     messsage: "Users with the Issued Books..",
+//     data: issuedBooks,
+//   });
+// });
 
 /**
  * Route: /
@@ -86,10 +94,10 @@ router.get("/issued/by-user", (req, res) => {
  * Parameters: None
  */
 
-router.post("/", (req, res) =>{
+router.post("/", (req, res) => {
   const { data } = req.body;
 
-  if(!data) {
+  if (!data) {
     return res.status(400).json({
       success: false,
       message: "No Data To Add A Book",
@@ -97,7 +105,7 @@ router.post("/", (req, res) =>{
   }
 
   const book = books.find((each) => each.id === data.id);
-  if (book){
+  if (book) {
     return res.status(404).json({
       success: false,
       message: "Id Already Exists !!",
@@ -121,20 +129,20 @@ router.post("/", (req, res) =>{
  * Data: id, name, author, genre, price, publisher
  */
 
-router.put("/updateBook/:id", (req, res) =>{
+router.put("/updateBook/:id", (req, res) => {
   const { id } = req.params;
   const { data } = req.body;
 
   const book = books.find((each) => each.id === id);
 
-  if (!book){
+  if (!book) {
     return res.status($00).json({
-      success: false, 
-      message:"Book Not Found For This ID",
+      success: false,
+      message: "Book Not Found For This ID",
     });
   }
 
-    const updateData = books.map((each) => {
+  const updateData = books.map((each) => {
     if (each.id === id) {
       return { ...each, ...data };
     }
@@ -147,7 +155,6 @@ router.put("/updateBook/:id", (req, res) =>{
     data: updateData,
   });
 });
-
 
 // /**
 //  * Route: /:id
