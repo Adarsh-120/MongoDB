@@ -1,21 +1,6 @@
 const { UserModel, BookModel } = require("../models");
 
-// router.get("/:id", (req, res) => {
-//   const { id } = req.params;
-//   console.log(req.params);
-//   const user = users.find((each) => each.id === id);
-//   if (!user) {
-//     return res.status(404).json({
-//       success: false,
-//       message: "User Doesn't Exist",
-//     });
-//   }
-//   return res.status(200).json({
-//     success: true,
-//     message: "User Found",
-//     data: user,
-//   });
-// });
+
 
 
 exports.getAllUsers = async(req, res) => {
@@ -103,68 +88,61 @@ exports.deleteUser = async(req, res) => {
       .json({ success: true, message: "Deleted User..", data: user });    //check data , it would be user or users
 };
 
+exports.getSubscriptionDetailsById = async(req, res) => {
+  const { id } = req.params;
+  const user = await UserModel.findById(id);
 
-// router.get("/subscription-details/:id", (req, res) => {
-//   const { id } = req.params;
-//   const user = users.find((each) => each.id === id);
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User with the ID Didn't Exists",
+    });
+  }
+  const getDateInDays = (data = "") => {
+    let date;
+    if (data === "") {
+      date = new Date();
+    } else {
+      date = new Date(data);
+    }
+    let days = Math.floor(date / (1000 * 60 * 60 * 24));
+    return days;
+  };
 
-//   if (!user) {
-//     return res.status(404).json({
-//       success: false,
-//       message: "User with the ID Didn't Exists",
-//     });
-//   }
-//   const getDateInDays = (data = "") => {
-//     let date;
-//     if (data === "") {
-//       date = new Date();
-//     } else {
-//       date = new Date(data);
-//     }
-//     let days = Math.floor(date / (1000 * 60 * 60 * 24));
-//     return days;
-//   };
+  const subscriptionType = (date) => {
+    if (user.subscriptionType === "Basic") {
+      date = date + 90;
+    } else if (user.subscriptionType === "Standard") {
+      date = date + 180;
+    } else if (user.subscriptionType === "Premium") {
+      date = date + 365;
+    }
+    return date;
+  };
+  let returnDateInDays = getDateInDays(user.returnDate);
+  let currentDateInDays = getDateInDays();
+  let subscriptionDateInDays = getDateInDays(user.subscriptionDate);
+  let subscriptionExpiration = subscriptionType(subscriptionDateInDays);
 
-//   const subscriptionType = (date) => {
-//     if (user.subscriptionType === "Basic") {
-//       date = date + 90;
-//     } else if (user.subscriptionType === "Standard") {
-//       date = date + 180;
-//     } else if (user.subscriptionType === "Premium") {
-//       date = date + 365;
-//     }
-//     return date;
-//   };
+    const data = {
+      ...user,
+      isSubscriptionExpired: subscriptionExpiration < currentDateInDays,
+      daysLeftForExpiration:
+        subscriptionExpiration <= currentDateInDays
+          ? 0
+          : subscriptionExpiration - currentDateInDays,
+      fine:
+        returnDateInDays < currentDateInDays
+          ? subscriptionExpiration < currentDateInDays
+            ? 100
+            : 50
+          : 0,
+    };
+    return res.status(200).json({
+      success: true,
+      message: "Subscription detail for the user is: ",
+      data,
+    });
+};
 
-//   // Jan 1 1970 UTC
 
-//   let returnDateInDays = getDateInDays(user.returnDate);
-//   let currentDateInDays = getDateInDays();
-//   let subscriptionDateInDays = getDateInDays(user.subscriptionDate);
-//   let subscriptionExpiration = subscriptionType(subscriptionDateInDays);
-
-//   // console.log("returnDate", returnDateInDays);
-//   // console.log("currentDate", currentDateInDays);
-//   // console.log("subscriptionDate", subscriptionDateInDays);
-//   // console.log("subscriptionExpiration", subscriptionExpiration);
-
-//   const data = {
-//     ...user,
-//     isSubscriptionExpired: subscriptionExpiration < currentDateInDays,
-//     daysLeftForExpiration:
-//       subscriptionExpiration <= currentDateInDays
-//         ? 0
-//         : subscriptionExpiration - currentDateInDays,
-//     fine:
-//       returnDateInDays < currentDateInDays
-//         ? subscriptionExpiration < currentDateInDays
-//           ? 100
-//           : 50
-//         : 0,
-//   };
-//   return res.status(200).json({
-//     success: true,
-//     message: "Subscription detail for the user is: ",
-//     data,
-//   });
-// });
